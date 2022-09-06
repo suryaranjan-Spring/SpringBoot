@@ -1,0 +1,67 @@
+#https://github.com/skylvr1289/sample_kafka
+version: '2'
+networks:
+  product-net:
+    driver: bridge
+
+services:
+  kafkaproducerconsumer:
+    image: spring-kafka.jar:latest
+    container_name: spring-kafka
+    depends_on:
+      - kafka
+    restart: always
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "9090:8080"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:29092"
+    networks:
+      - product-net
+  # Zookeeper, single node
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 2181:2181
+      - 2888:2888
+      - 3888:3888
+    networks:
+      - product-net
+
+  # kafka single node
+  kafka:
+    image: wurstmeister/kafka:latest
+    restart: "no"
+    links:
+      - zookeeper
+    ports:
+      - 9092:9092
+    networks:
+      - product-net
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://:29092,EXTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      #https://github.com/wurstmeister/kafka-docker/issues/553
+
+  #kafdrop for topic/msg visualization
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    restart: "no"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:29092"
+      # JVM_OPTS: "-Xms16M -Xmx512M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+    ports:
+      - 9000:9000
+    networks:
+      - product-net
+    depends_on:
+      - kafka
