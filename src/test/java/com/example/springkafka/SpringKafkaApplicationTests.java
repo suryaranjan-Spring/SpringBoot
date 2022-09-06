@@ -8,6 +8,7 @@ class SpringKafkaApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// need to write test case
 	}
 
 }
