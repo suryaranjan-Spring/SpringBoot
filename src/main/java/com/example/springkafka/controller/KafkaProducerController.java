@@ -20,12 +20,12 @@ public class KafkaProducerController {
     private User user;
 @GetMapping("/testkafkaproducer")
     public String testKafka() {
-    kafkaTemplate.send("demo","it is working fine");
+    kafkaTemplate.send("product","it is working fine");
         return "It is Working fine !!";
     }
     @GetMapping("/userTest")
     public User userTest(){
-    kafkaTemplate.send("demo",user);
+    kafkaTemplate.send("product",user);
     return user;
     }
     @PostConstruct

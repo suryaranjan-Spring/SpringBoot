@@ -9,20 +9,29 @@ services:
     image: spring-kafka.jar:latest
     container_name: spring-kafka
     depends_on:
-      - kafka
+      - broker
+    links:
+      - broker
     restart: always
     build:
       context: ./
       dockerfile: Dockerfile
     ports:
-      - "9090:8080"
+      - "8080:8080"
     environment:
-      KAFKA_BROKERCONNECT: "kafka:29092"
+      #- KAFKA_GROUP_ID=driver-group-id
+      - KAFKA_BOOTSTRAP_SERVERS=broker:29092
+      #- kafka.consumer.group.id=driver-group-id
+      #- kafka.consumer.enable.auto.commit=true
+      #- kafka.consumer.auto.commit.interval.ms=1000
+      #- kafka.consumer.auto.offset.reset=earliest
+      #- kafka.consumer.max.poll.records=1
     networks:
       - product-net
   # Zookeeper, single node
   zookeeper:
     image: wurstmeister/zookeeper:latest
+    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -34,8 +43,9 @@ services:
       - product-net
 
   # kafka single node
-  kafka:
+  broker:
     image: wurstmeister/kafka:latest
+    container_name: broker
     restart: "no"
     links:
       - zookeeper
@@ -47,21 +57,27 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS: INTERNAL://:29092,EXTERNAL://:9092
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker:29092,EXTERNAL://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      #KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      #KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+     # KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      #GROUP_ID: driver-group-id
+     # KAFKA_CREATE_TOPICS: "product"
       #https://github.com/wurstmeister/kafka-docker/issues/553
 
   #kafdrop for topic/msg visualization
   kafdrop:
-    image: obsidiandynamics/kafdrop
-    restart: "no"
-    environment:
-      KAFKA_BROKERCONNECT: "kafka:29092"
-      # JVM_OPTS: "-Xms16M -Xmx512M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
-    ports:
-      - 9000:9000
-    networks:
-      - product-net
-    depends_on:
-      - kafka
+      image: obsidiandynamics/kafdrop
+      container_name: kafdrop
+      restart: "no"
+      environment:
+        KAFKA_BROKERCONNECT: "broker:29092"
+        # JVM_OPTS: "-Xms16M -Xmx512M -Xss180K -XX:-TieredCompilation -XX:+UseStringDeduplication -noverify"
+      ports:
+        - 9000:9000
+      networks:
+        - product-net
+      depends_on:
+        - broker
