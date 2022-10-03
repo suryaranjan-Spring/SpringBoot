@@ -1,0 +1,54 @@
+services:
+  # Service for spring boot backend
+  springboot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: springneo4j.jar
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+    networks:
+      - feature-designer
+    depends_on:
+      - neo4j-db
+
+
+    environment:
+      NEO4J_URI: bolt://neo4j-db:7687
+      NEO4J_PASSWORD: test
+    links:
+      - neo4j-db
+
+  # Service for Neo4j database
+  neo4j-db:
+    image: neo4j:latest
+    container_name: "neo4j_container"
+    restart: on-failure
+    ports:
+      - "7474:7474" # HTTP
+      - "7687:7687" # Bolt
+    environment:
+      NEO4J_AUTH: neo4j/test # Username: neo4j, Password: test
+      dbms_connector_bolt_listen__address: neo4j-db:7687
+      dbms_connector_bolt_advertised__address: neo4j-db:7687
+      NEO4J_apoc_import_file_enabled: 'true'
+      NEO4J_apoc_export_file_enabled: 'true'
+      NEO4J_apoc_import_file_use__neo4j__config: 'true'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+      NEO4J_dbms_security_procedures_whitelist: apoc.*
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/plugins:/plugins
+      - ./neo4j/logs:/logs
+      - ./neo4j/import:/import
+      - ./neo4j/conf:/conf
+    networks:
+      - feature-designer
+
+
+networks:
+  feature-designer:
+    driver: bridge

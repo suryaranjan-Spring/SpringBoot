@@ -1,0 +1,15 @@
+spring:
+  jpa:
+    show-sql: true
+  neo4j:
+    uri: bolt://localhost:7687
+    #uri:  bolt://neo4j-db:7687
+    authentication:
+      password: test
+      username: neo4j
+
+
+server:
+  port: 9090
+
+
