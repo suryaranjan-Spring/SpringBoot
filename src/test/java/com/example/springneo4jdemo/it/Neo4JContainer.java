@@ -3,6 +3,7 @@ package com.example.springneo4jdemo.it;
 import com.example.springneo4jdemo.dto.SubjectPayLoadDTO;
 import com.example.springneo4jdemo.service.SubjectImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.driver.AuthTokens;
 import org.neo4j.driver.Driver;
@@ -92,6 +93,7 @@ public abstract class Neo4JContainer {
     }
 
     @Test
+    @Disabled
     public void testFecthSubjectByName() {
         String subjectName = "Java";
         String outPut = subjectImp.findBySubjectName(subjectName);

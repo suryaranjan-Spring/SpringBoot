@@ -60,10 +60,7 @@ public class SubjectControllerTest extends Neo4JContainer {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .consumeWith(response -> {
-                    Assertions.assertNotNull(response.getResponseBody());
-                    Assertions.ass
-                });
+                .consumeWith(response ->  Assertions.assertNotNull(response.getResponseBody()));
 
     }
     @Test
