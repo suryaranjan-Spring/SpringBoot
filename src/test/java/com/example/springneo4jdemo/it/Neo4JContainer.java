@@ -55,7 +55,7 @@ public abstract class Neo4JContainer {
         registry.add("spring.data.neo4j.database", () -> "neo4j");
     }
 
-    @BeforeEach
+
     public void setUpData() {
         subjectPayLoadDTOList = new ArrayList<>();
         SubjectPayLoadDTO subject1 = new SubjectPayLoadDTO();
